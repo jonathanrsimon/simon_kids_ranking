@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simon Kids Ranking</title>
+<meta name="description" content="The official, totally scientific ranking of the Simon and Scotson kids.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sea-top: #4fc3f7;
+    --sea-bottom: #01579b;
+    --sponge: #fff200;
+    --sponge-dark: #c9b800;
+    --hole: #b5a300;
+    --pants: #8d5524;
+    --red: #e53935;
+    --pink: #ff8fb1;
+    --good: #2e9e44;
+    --bad: #d32f2f;
+    --flower-1: #ffffff;
+    --flower-2: #a5f3a5;
+    --flower-3: #ff9fe0;
+    --flower-4: #c9a6ff;
+    --ink: #2b1a00;
+    --sand: #f4d58d;
+    --ticker-h: 48px;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  .toast {
+    position: fixed; left: 50%; bottom: 24px; z-index: 30; max-width: calc(100vw - 32px);
+    transform: translate(-50%, 140%); transition: transform .3s ease;
+    padding: 12px 18px; font-weight: 700; text-align: center;
+    background: #fff; border: 3px solid var(--ink); border-radius: 14px; box-shadow: 4px 4px 0 var(--ink);
+  }
+  .toast.show { transform: translate(-50%, 0); }
+  .sat:disabled { cursor: default; }
+  .sat:disabled::-webkit-slider-thumb { display: none; }
+  .sat:disabled::-moz-range-thumb { visibility: hidden; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Fredoka", system-ui, sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding-top: var(--ticker-h);
+    background: linear-gradient(180deg, var(--sea-top) 0%, #29b6f6 35%, #0288d1 70%, var(--sea-bottom) 100%);
+    position: relative;
+  }
+  button { font-family: inherit; color: inherit; }
+
+  /* Bikini-bottom style sky flowers */
+  .flowers { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .55; }
+  .flower { position: absolute; width: var(--s); height: var(--s); }
+  .flower::before, .flower::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 18%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 82% 42%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 70% 80%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 30% 80%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 18% 42%, var(--c) 0 18%, transparent 19%);
+  }
+  .flower::after { background: radial-gradient(circle at 50% 52%, var(--c) 0 22%, transparent 23%); filter: brightness(.92); }
+
+  /* Bubbles */
+  .bubbles { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+  .bubble {
+    position: absolute; bottom: -60px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.8);
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9) 0 12%, rgba(255,255,255,.15) 13% 100%);
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    10%  { opacity: 1; }
+    50%  { transform: translate(20px, -55vh); }
+    100% { transform: translate(-15px, -115vh); opacity: .9; }
+  }
+
+  /* News ticker bar */
+  .ticker {
+    position: fixed; top: 0; left: 0; right: 0; height: var(--ticker-h); z-index: 20;
+    display: flex; align-items: stretch;
+    background: #fff; border-bottom: 4px solid var(--ink);
+    box-shadow: 0 4px 0 rgba(0,0,0,.15);
+    cursor: pointer; border-top: 0; border-left: 0; border-right: 0; padding: 0; width: 100%;
+    text-align: left;
+  }
+  .ticker-label {
+    flex: none; display: flex; align-items: center; gap: 6px; padding: 4px 14px 0;
+    font-family: "Luckiest Guy", cursive; font-size: 1.1rem; letter-spacing: 1px;
+    background: var(--red); color: #fff; border-right: 4px solid var(--ink);
+  }
+  .ticker-track { flex: 1; overflow: hidden; display: flex; align-items: center; position: relative; }
+  .ticker-items {
+    display: inline-flex; gap: 36px; white-space: nowrap; padding-left: 100%;
+    font-weight: 600; animation: scroll var(--dur, 30s) linear infinite;
+  }
+  .ticker-items.static { padding-left: 16px; animation: none; }
+  .ticker:hover .ticker-items { animation-play-state: paused; }
+  @keyframes scroll { to { transform: translateX(-100%); } }
+  .ticker-open {
+    flex: none; display: flex; align-items: center; padding: 0 14px;
+    font-weight: 700; background: var(--sponge); border-left: 4px solid var(--ink);
+  }
+  .tag { font-weight: 700; }
+  .tag.good { color: var(--good); }
+  .tag.bad { color: var(--bad); }
+
+  main { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 32px 16px 120px; }
+
+  header { text-align: center; margin-bottom: 36px; }
+  h1 {
+    font-family: "Luckiest Guy", cursive;
+    font-size: clamp(2.6rem, 9vw, 5.2rem);
+    line-height: .95;
+    margin: 0;
+    color: var(--sponge);
+    letter-spacing: 2px;
+    -webkit-text-stroke: 3px #e65100;
+    text-shadow: 4px 4px 0 #e65100, 8px 8px 0 rgba(0,0,0,.25);
+    transform: rotate(-3deg);
+  }
+  h1 span { display: inline-block; animation: wobble 2.4s ease-in-out infinite; }
+  h1 span:nth-child(2) { animation-delay: .2s; color: var(--pink); }
+  h1 span:nth-child(3) { animation-delay: .4s; }
+  @keyframes wobble { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(2deg); } }
+  .tagline {
+    display: inline-block; margin-top: 20px; padding: 8px 18px;
+    background: #fff; border: 3px solid var(--ink); border-radius: 999px;
+    font-weight: 700; font-size: 1.05rem; box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  /* Ranking cards = little sponges */
+  ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; }
+  .card {
+    position: relative;
+    display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px;
+    padding: 22px 22px 34px;
+    border: 4px solid var(--ink);
+    border-radius: 22px 30px 18px 34px;
+    background-color: var(--sponge);
+    background-image:
+      radial-gradient(ellipse 14px 10px at 12% 25%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 9px 12px at 30% 70%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 16px 11px at 55% 30%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 10px 8px at 72% 75%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 13px 15px at 90% 35%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 7px 7px at 45% 85%, var(--hole) 60%, transparent 62%);
+    box-shadow: 6px 6px 0 var(--sponge-dark), 6px 6px 0 4px var(--ink);
+    transition: transform .2s ease;
+  }
+  .card.intro { animation: pop-in .6s cubic-bezier(.2,1.6,.4,1) both; }
+  .card.moved { animation: bump .45s cubic-bezier(.2,1.6,.4,1); }
+  /* Brown square pants strip with a belt */
+  .card::after {
+    content: ""; position: absolute; left: -4px; right: -4px; bottom: -4px; height: 18px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 40px, #111 40px 56px) 0 4px / 100% 5px no-repeat,
+      var(--pants);
+    border: 4px solid var(--ink); border-top-width: 3px;
+    border-radius: 0 0 18px 34px;
+  }
+  @keyframes pop-in { from { opacity: 0; transform: scale(.6) rotate(-6deg); } to { opacity: 1; transform: none; } }
+  @keyframes bump { 0% { transform: scale(.94); } 60% { transform: scale(1.03) rotate(-1deg); } 100% { transform: none; } }
+
+  .rank {
+    width: 82px; height: 82px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: "Luckiest Guy", cursive; font-size: 2.6rem; padding-top: 6px;
+    border: 4px solid var(--ink);
+    box-shadow: inset -6px -6px 0 rgba(0,0,0,.12), inset 5px 5px 0 rgba(255,255,255,.35);
+    background: #222; color: #fff;
+  }
+  .card[data-rank="1"] .rank { background: linear-gradient(135deg, #fff3a0, #ffc400 45%, #c79100); color: #5a3d00; }
+  .card[data-rank="2"] .rank { background: linear-gradient(135deg, #ffffff, #c9ced6 45%, #8a939e); color: #2f3640; }
+  .card[data-rank="3"] .rank { background: linear-gradient(135deg, #ffd1a3, #cd7f32 45%, #8a4f1d); color: #fff; }
+  .card[data-rank="4"] .rank { background: #1b1b1b; color: #fff; }
+  .card[data-rank="5"] .rank { background: #fff; color: #1b1b1b; }
+  .card[data-rank="1"] { padding-top: 30px; }
+  .crown {
+    position: absolute; top: -26px; left: 22px; font-size: 2.6rem;
+    animation: wobble 1.8s ease-in-out infinite;
+  }
+
+  .name {
+    font-family: "Luckiest Guy", cursive;
+    font-size: clamp(1.6rem, 5.5vw, 2.4rem);
+    margin: 0; line-height: 1.05; letter-spacing: 1px;
+  }
+  .name button {
+    all: unset; cursor: pointer;
+    color: #fff; -webkit-text-stroke: 1.5px var(--ink);
+    text-shadow: 3px 3px 0 var(--ink);
+  }
+  .name button:hover, .name button:focus-visible { color: var(--pink); }
+  .name button:focus-visible { outline: 3px dashed var(--ink); outline-offset: 4px; }
+  .title { margin: 6px 0 10px; font-weight: 700; font-size: 1.05rem; }
+
+  /* Satisfaction meter */
+  .sat-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-weight: 700; font-size: .95rem; }
+  .sat-value { font-family: "Luckiest Guy", cursive; font-size: 1.35rem; letter-spacing: 1px; }
+  .sat-value small { font-family: "Fredoka", sans-serif; font-size: .85rem; }
+  .sat {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 22px; margin: 4px 0 0;
+    border: 3px solid var(--ink); border-radius: 999px; cursor: pointer;
+    background: linear-gradient(90deg, var(--fill) 0 var(--pct), #fff var(--pct));
+  }
+  .sat::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 28px; height: 28px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+  }
+  .sat::-moz-range-thumb {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--ink); box-shadow: 2px 2px 0 var(--ink);
+  }
+  .sat:focus-visible { outline: 3px dashed var(--ink); outline-offset: 3px; }
+
+  /* Move buttons */
+  .moves { display: grid; gap: 8px; }
+  .move {
+    width: 46px; height: 46px; border-radius: 12px; cursor: pointer;
+    font-size: 1.3rem; font-weight: 700; line-height: 1;
+    background: #fff; border: 3px solid var(--ink); box-shadow: 3px 3px 0 var(--ink);
+  }
+  .move:hover:not(:disabled) { background: var(--pink); color: #fff; }
+  .move:active:not(:disabled) { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+  .move:disabled { opacity: .3; cursor: default; }
+
+  .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-top: 40px; }
+  .big-btn {
+    font-family: "Luckiest Guy", cursive; font-size: 1.25rem; letter-spacing: 1px; padding: 14px 24px 10px;
+    background: var(--pink); color: #fff; -webkit-text-stroke: 1px var(--ink);
+    border: 4px solid var(--ink); border-radius: 999px; box-shadow: 5px 5px 0 var(--ink);
+    cursor: pointer;
+  }
+  .big-btn.alt { background: #fff; color: var(--ink); -webkit-text-stroke: 0; }
+  .big-btn:active { transform: translate(3px,3px); box-shadow: 2px 2px 0 var(--ink); }
+  .note { text-align: center; color: #fff; font-weight: 600; margin-top: 14px; text-shadow: 1px 1px 0 rgba(0,0,0,.4); }
+
+  .sand {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 70px; z-index: 1;
+    background:
+      radial-gradient(ellipse at 20% 0, transparent 40px, var(--sand) 41px) 0 0 / 160px 70px repeat-x;
+  }
+
+  /* Dialogs (profile + news) */
+  dialog {
+    width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 48px);
+    padding: 0; border: 4px solid var(--ink); border-radius: 24px;
+    background: var(--sponge); color: var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+  dialog::backdrop { background: rgba(1, 50, 90, .65); }
+  dialog[open] { animation: pop-in .35s cubic-bezier(.2,1.6,.4,1); }
+  .dlg-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px 10px 20px; background: var(--red); border-bottom: 4px solid var(--ink);
+  }
+  .dlg-head h2 {
+    margin: 0; font-family: "Luckiest Guy", cursive; font-size: 1.7rem; letter-spacing: 1px; padding-top: 4px;
+    color: #fff; -webkit-text-stroke: 1px var(--ink); text-shadow: 2px 2px 0 var(--ink);
+  }
+  .close {
+    width: 40px; height: 40px; flex: none; border-radius: 50%; cursor: pointer;
+    font-size: 1.2rem; font-weight: 700; background: #fff; border: 3px solid var(--ink);
+  }
+  .dlg-body { padding: 20px; overflow-y: auto; }
+
+  .photo {
+    width: 160px; height: 160px; margin: 0 auto 18px; border-radius: 50%;
+    display: grid; place-items: center; overflow: hidden;
+    background: #fff; border: 4px solid var(--ink); box-shadow: 4px 4px 0 var(--ink);
+    font-size: 4.5rem;
+  }
+  .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-caption { text-align: center; font-weight: 600; margin: -10px 0 18px; font-size: .9rem; }
+  .profile-sections { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .box { background: #fff; border: 3px solid var(--ink); border-radius: 16px; padding: 12px 14px; }
+  .box h3 { margin: 0 0 6px; font-family: "Luckiest Guy", cursive; font-size: 1.2rem; letter-spacing: 1px; }
+  .box ul { margin: 0; padding-left: 20px; }
+  .empty { margin: 0; color: #7a6a3a; font-style: italic; }
+
+  .news-form { display: grid; gap: 10px; margin-bottom: 18px; }
+  .news-form .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .news-form select, .news-form input[type="text"] {
+    font: inherit; font-weight: 600; padding: 10px 12px;
+    border: 3px solid var(--ink); border-radius: 12px; background: #fff; min-width: 0;
+  }
+  .news-form input[type="text"] { flex: 1 1 220px; }
+  .news-form select { flex: 1 1 150px; }
+  .kind { display: flex; gap: 8px; flex: 1 1 100%; }
+  .kind label {
+    flex: 1; text-align: center; padding: 8px; cursor: pointer; font-weight: 700;
+    background: #fff; border: 3px solid var(--ink); border-radius: 12px;
+  }
+  .kind input { position: absolute; opacity: 0; pointer-events: none; }
+  .kind input:checked + span { text-decoration: underline; }
+  .kind label:has(input[value="good"]:checked) { background: var(--good); color: #fff; }
+  .kind label:has(input[value="bad"]:checked) { background: var(--bad); color: #fff; }
+  .kind label:has(input:focus-visible) { outline: 3px dashed var(--ink); outline-offset: 2px; }
+  .add-btn {
+    font: inherit; font-weight: 700; padding: 10px 18px; cursor: pointer;
+    background: var(--pink); color: #fff; border: 3px solid var(--ink); border-radius: 12px; box-shadow: 3px 3px 0 var(--ink);
+  }
+  .news-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .news-cols .box h3.good { color: var(--good); }
+  .news-cols .box h3.bad { color: var(--bad); }
+  .news-list { list-style: none; padding: 0 !important; margin: 0; display: grid; gap: 8px; }
+  .news-list li { display: grid; grid-template-columns: 1fr auto; gap: 6px; align-items: start; padding-bottom: 8px; border-bottom: 2px dashed #e6dca0; }
+  .news-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+  .news-who { font-weight: 700; }
+  .news-when { display: block; font-size: .78rem; color: #7a6a3a; }
+  .del { all: unset; cursor: pointer; font-size: .95rem; padding: 0 4px; }
+  .del:focus-visible { outline: 2px dashed var(--ink); }
+
+  @media (max-width: 560px) {
+    .card { grid-template-columns: 1fr auto; text-align: center; }
+    .card .rank { grid-column: 1 / -1; justify-self: center; }
+    .card .info { grid-column: 1; text-align: left; }
+    .crown { left: 50%; transform: translateX(-50%); }
+    .profile-sections, .news-cols { grid-template-columns: 1fr; }
+    .ticker-label { font-size: .95rem; padding: 4px 10px 0; }
+    .ticker-open { padding: 0 10px; font-size: .9rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .bubbles { display: none; }
+    .ticker-items { padding-left: 16px; }
+  }
+</style>
+</head>
+<body>
+  <button class="ticker" id="ticker" type="button" aria-label="Open the good and bad news list">
+    <span class="ticker-label">📰 News</span>
+    <span class="ticker-track"><span class="ticker-items" id="tickerItems"></span></span>
+    <span class="ticker-open">See all ›</span>
+  </button>
+
+  <div class="flowers" id="flowers" aria-hidden="true"></div>
+  <div class="bubbles" id="bubbles" aria-hidden="true"></div>
+
+  <main>
+    <header>
+      <h1><span>Simon</span> <span>Kids</span> <span>Ranking!</span></h1>
+      <div class="tagline">🍍 Live from the bottom of the sea 🍍</div>
+    </header>
+
+    <ol id="ranking"></ol>
+
+    <div class="controls">
+      <button class="big-btn" id="openNews" type="button">📰 Good &amp; Bad News</button>
+      <button class="big-btn alt" id="reset" type="button" hidden>↺ Reset to Official</button>
+      <button class="big-btn alt" id="lock" type="button" hidden>🔒 Parent Login</button>
+    </div>
+    <p class="note" id="hint"></p>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="sand" aria-hidden="true"></div>
+
+  <!-- Profile popup -->
+  <dialog id="profile" aria-labelledby="profileName">
+    <div class="dlg-head">
+      <h2 id="profileName"></h2>
+      <button class="close" type="button" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="dlg-body">
+      <div class="photo" id="profilePhoto"></div>
+      <p class="photo-caption" id="profileCaption"></p>
+      <div class="profile-sections">
+        <div class="box">
+          <h3>💪 Skills</h3>
+          <div id="profileSkills"></div>
+        </div>
+        <div class="box">
+          <h3>🙈 Weaknesses</h3>
+          <div id="profileWeaknesses"></div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Good & bad news -->
+  <dialog id="news" aria-labelledby="newsTitle">
+    <div class="dlg-head">
+      <h2 id="newsTitle">Good &amp; Bad News</h2>
+      <button class="close" type="button" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="dlg-body">
+      <form class="news-form" id="newsForm">
+        <div class="row kind" role="radiogroup" aria-label="Good or bad">
+          <label><input type="radio" name="kind" value="good" checked><span>👍 Good</span></label>
+          <label><input type="radio" name="kind" value="bad"><span>👎 Bad</span></label>
+        </div>
+        <div class="row">
+          <select id="newsKid" aria-label="Which kid"></select>
+          <input type="text" id="newsText" maxlength="140" placeholder="What happened?" aria-label="What happened" required>
+          <button class="add-btn" type="submit">Add</button>
+        </div>
+      </form>
+      <div class="news-cols">
+        <div class="box">
+          <h3 class="good">👍 Good</h3>
+          <ul class="news-list" id="goodList"></ul>
+        </div>
+        <div class="box">
+          <h3 class="bad">👎 Bad</h3>
+          <ul class="news-list" id="badList"></ul>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+<script>
+  // ---- Official data (edit here) ----
+  // photo: an image path like "photos/nathan.jpg"; skills / weaknesses: lists of strings.
+  const KIDS = [
+    { id: "nathan", name: "Nathan Scotson", title: "Supreme Captain of the Seven Seas", photo: "", skills: [], weaknesses: [] },
+    { id: "jordan", name: "Jordan Simon",   title: "Grand Master Jellyfisher",          photo: "", skills: [], weaknesses: [] },
+    { id: "avery",  name: "Avery Simon",    title: "Head Fry Cook of Awesomeness",      photo: "", skills: [], weaknesses: [] },
+    { id: "carter", name: "Carter Simon",   title: "Undefeated Bubble Blowing Champ",   photo: "", skills: [], weaknesses: [] },
+    { id: "david",  name: "David Scotson",  title: "Legendary Sandcastle Architect",    photo: "", skills: [], weaknesses: [] },
+  ];
+  const DEFAULT_SATISFACTION = 5.0;
+  const byId = Object.fromEntries(KIDS.map(k => [k.id, k]));
+
+  // ---- Shared state (stored in the database via /api/state) ----
+  let state = {
+    order: KIDS.map(k => k.id),
+    satisfaction: Object.fromEntries(KIDS.map(k => [k.id, DEFAULT_SATISFACTION])),
+    news: [],
+    locked: true,
+  };
+  let online = false;
+  const PASS_KEY = "simonKidsRanking.passcode";
+  let passcode = "";
+  try { passcode = sessionStorage.getItem(PASS_KEY) || ""; } catch {}
+  let unlocked = false;
+  const canEdit = () => online && (!state.locked || unlocked);
+
+  function applyServerState(data) {
+    state = {
+      order: data.order.filter(id => byId[id]).concat(KIDS.map(k => k.id).filter(id => !data.order.includes(id))),
+      satisfaction: { ...state.satisfaction, ...data.satisfaction },
+      news: data.news.filter(n => byId[n.kid]),
+      locked: data.locked,
+    };
+  }
+  async function api(body) {
+    const opts = body
+      ? { method: "POST", headers: { "content-type": "application/json", "x-passcode": passcode }, body: JSON.stringify(body) }
+      : { method: "GET" };
+    const res = await fetch("/api/state", opts);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw Object.assign(new Error(data.error || "Something went wrong"), { status: res.status });
+    return data;
+  }
+  // Send a change, then redraw from what the server saved.
+  async function save(body, redraw = true) {
+    try {
+      applyServerState(await api(body));
+    } catch (err) {
+      if (err.status === 401) { unlocked = false; updateLock(); }
+      toast(err.message === "Wrong passcode" ? "That passcode didn't work." : "Couldn't save — check your connection.");
+      try { applyServerState(await api()); } catch {}
+    }
+    if (redraw) render();
+    renderNews();
+  }
+
+  const toastEl = document.getElementById("toast");
+  let toastTimer;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove("show"), 3500);
+  }
+
+  // ---- Helpers ----
+  function satColor(v) {
+    // red (1) -> yellow (5.5) -> green (10)
+    const hue = Math.round(((v - 1) / 9) * 120);
+    return `hsl(${hue} 75% 48%)`;
+  }
+  function satFace(v) {
+    if (v >= 9) return "🤩";
+    if (v >= 7.5) return "😄";
+    if (v >= 6) return "🙂";
+    if (v >= 4.5) return "😐";
+    if (v >= 3) return "😕";
+    return "😭";
+  }
+  function paintSlider(input) {
+    const v = parseFloat(input.value);
+    input.style.setProperty("--pct", ((v - 1) / 9 * 100) + "%");
+    input.style.setProperty("--fill", satColor(v));
+  }
+  function el(tag, props = {}, text) {
+    const e = document.createElement(tag);
+    Object.assign(e, props);
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  // ---- Ranking ----
+  const list = document.getElementById("ranking");
+  function render({ intro = false, movedId = null } = {}) {
+    list.innerHTML = "";
+    state.order.forEach((id, i) => {
+      const kid = byId[id];
+      const rank = i + 1;
+      const sat = state.satisfaction[id];
+      const li = el("li", { className: "card" + (intro ? " intro" : "") + (id === movedId ? " moved" : "") });
+      li.dataset.rank = rank;
+      if (intro) li.style.animationDelay = (i * 0.12) + "s";
+      const edit = canEdit();
+      li.innerHTML = `
+        ${rank === 1 ? '<div class="crown" aria-hidden="true">👑</div>' : ""}
+        <div class="rank" aria-label="Rank ${rank}">${rank}</div>
+        <div class="info">
+          <h2 class="name"><button type="button" data-profile="${id}"></button></h2>
+          <p class="title"></p>
+          <div class="sat-head">
+            <label for="sat-${id}">Satisfaction</label>
+            <span class="sat-value"><span data-face></span> <span data-num></span><small> / 10</small></span>
+          </div>
+          <input class="sat" id="sat-${id}" type="range" min="1" max="10" step="0.1" value="${sat}" data-sat="${id}" ${edit ? "" : "disabled"}>
+        </div>
+        <div class="moves" ${edit ? "" : "hidden"}>
+          <button class="move" type="button" data-move="up" data-id="${id}" aria-label="Move ${kid.name} up" ${rank === 1 ? "disabled" : ""}>▲</button>
+          <button class="move" type="button" data-move="down" data-id="${id}" aria-label="Move ${kid.name} down" ${rank === state.order.length ? "disabled" : ""}>▼</button>
+        </div>`;
+      li.querySelector(".name button").textContent = kid.name;
+      li.querySelector(".title").textContent = kid.title;
+      li.querySelector("[data-face]").textContent = satFace(sat);
+      li.querySelector("[data-num]").textContent = sat.toFixed(1);
+      paintSlider(li.querySelector(".sat"));
+      list.appendChild(li);
+    });
+  }
+
+  list.addEventListener("click", e => {
+    const move = e.target.closest("[data-move]");
+    if (move) {
+      const id = move.dataset.id;
+      const i = state.order.indexOf(id);
+      const j = move.dataset.move === "up" ? i - 1 : i + 1;
+      if (j < 0 || j >= state.order.length) return;
+      [state.order[i], state.order[j]] = [state.order[j], state.order[i]];
+      const focusAgain = () => {
+        const again = list.querySelector(`[data-move="${move.dataset.move}"][data-id="${id}"]`);
+        (again && !again.disabled ? again : list.querySelector(`[data-id="${id}"]:not(:disabled)`))?.focus();
+      };
+      render({ movedId: id });
+      focusAgain();
+      save({ action: "order", order: state.order }, false).then(() => {
+        if (state.order.join() !== [...list.querySelectorAll("[data-profile]")].map(b => b.dataset.profile).join()) { render(); focusAgain(); }
+      });
+      return;
+    }
+    const prof = e.target.closest("[data-profile]");
+    if (prof) openProfile(prof.dataset.profile);
+  });
+
+  list.addEventListener("input", e => {
+    const input = e.target.closest("[data-sat]");
+    if (!input) return;
+    const v = Math.round(parseFloat(input.value) * 10) / 10;
+    state.satisfaction[input.dataset.sat] = v;
+    paintSlider(input);
+    const card = input.closest(".card");
+    card.querySelector("[data-num]").textContent = v.toFixed(1);
+    card.querySelector("[data-face]").textContent = satFace(v);
+  });
+  // Save once the slider is let go, not on every tiny movement.
+  list.addEventListener("change", e => {
+    const input = e.target.closest("[data-sat]");
+    if (input) save({ action: "satisfaction", id: input.dataset.sat, value: state.satisfaction[input.dataset.sat] }, false);
+  });
+
+  document.getElementById("reset").addEventListener("click", () => {
+    if (!confirm("Put everyone back in their official order and reset satisfaction to 5.0? (News stays.)")) return;
+    save({ action: "reset" });
+  });
+
+  // ---- Parent lock ----
+  const lockBtn = document.getElementById("lock");
+  function updateLock() {
+    lockBtn.hidden = !online || !state.locked;
+    lockBtn.textContent = unlocked ? "🔓 Lock Editing" : "🔒 Parent Login";
+    document.getElementById("reset").hidden = !canEdit();
+    document.getElementById("newsForm").hidden = !canEdit();
+    document.getElementById("hint").textContent = canEdit()
+      ? "Use the ▲ ▼ arrows to move kids up and down, and slide the satisfaction meters. Tap a name to see their profile."
+      : "Tap a name to see their profile.";
+  }
+  lockBtn.addEventListener("click", async () => {
+    if (unlocked) {
+      unlocked = false; passcode = "";
+      try { sessionStorage.removeItem(PASS_KEY); } catch {}
+    } else {
+      const entered = prompt("Parent passcode:");
+      if (!entered) return;
+      passcode = entered;
+      try {
+        await api({ action: "check" });
+        unlocked = true;
+        try { sessionStorage.setItem(PASS_KEY, passcode); } catch {}
+      } catch (err) {
+        passcode = "";
+        toast(err.status === 401 ? "That passcode didn't work." : "Couldn't reach the server.");
+      }
+    }
+    updateLock(); render(); renderNews();
+  });
+
+  // ---- Dialogs ----
+  document.querySelectorAll("dialog").forEach(d => {
+    d.addEventListener("click", e => {
+      if (e.target === d || e.target.closest("[data-close]")) d.close();
+    });
+  });
+
+  // ---- Profile popup ----
+  const profile = document.getElementById("profile");
+  function fillList(container, items, emptyText) {
+    container.innerHTML = "";
+    if (!items.length) { container.appendChild(el("p", { className: "empty" }, emptyText)); return; }
+    const ul = el("ul");
+    items.forEach(t => ul.appendChild(el("li", {}, t)));
+    container.appendChild(ul);
+  }
+  function openProfile(id) {
+    const kid = byId[id];
+    const rank = state.order.indexOf(id) + 1;
+    document.getElementById("profileName").textContent = kid.name;
+    const photo = document.getElementById("profilePhoto");
+    photo.innerHTML = "";
+    if (kid.photo) photo.appendChild(el("img", { src: kid.photo, alt: kid.name }));
+    else photo.textContent = "🧽";
+    document.getElementById("profileCaption").textContent =
+      `#${rank} · ${kid.title}` + (kid.photo ? "" : " · Photo coming soon");
+    fillList(document.getElementById("profileSkills"), kid.skills, "Coming soon…");
+    fillList(document.getElementById("profileWeaknesses"), kid.weaknesses, "Coming soon…");
+    profile.showModal();
+  }
+
+  // ---- Good & bad news ----
+  const newsDlg = document.getElementById("news");
+  const kidSelect = document.getElementById("newsKid");
+  KIDS.forEach(k => kidSelect.appendChild(el("option", { value: k.id }, k.name)));
+
+  function fmtDate(ts) {
+    return new Date(ts).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  }
+  function renderNews() {
+    const sorted = [...state.news].sort((a, b) => b.at - a.at);
+    [["good", "goodList", "Nothing good yet…"], ["bad", "badList", "Nothing bad yet. Nice!"]].forEach(([kind, listId, emptyText]) => {
+      const ul = document.getElementById(listId);
+      ul.innerHTML = "";
+      const items = sorted.filter(n => n.kind === kind);
+      if (!items.length) ul.appendChild(el("li", {}, "")).appendChild(el("p", { className: "empty" }, emptyText));
+      items.forEach(n => {
+        const li = el("li");
+        const body = el("div");
+        body.appendChild(el("span", { className: "news-who" }, byId[n.kid].name.split(" ")[0] + ": "));
+        body.appendChild(document.createTextNode(n.text));
+        body.appendChild(el("span", { className: "news-when" }, fmtDate(n.at)));
+        li.append(body);
+        if (canEdit()) {
+          const del = el("button", { className: "del", type: "button", title: "Remove" }, "🗑️");
+          del.setAttribute("aria-label", "Remove this item");
+          del.addEventListener("click", () => {
+            if (!confirm("Remove this item?")) return;
+            state.news = state.news.filter(x => x.id !== n.id);
+            renderNews();
+            save({ action: "deleteNews", id: n.id }, false);
+          });
+          li.append(del);
+        }
+        ul.appendChild(li);
+      });
+    });
+    renderTicker(sorted);
+  }
+
+  const tickerItems = document.getElementById("tickerItems");
+  function renderTicker(sorted) {
+    tickerItems.innerHTML = "";
+    const recent = sorted.slice(0, 10);
+    if (!recent.length) {
+      tickerItems.classList.add("static");
+      tickerItems.textContent = "No news yet — tap here to add something good (or bad)!";
+      return;
+    }
+    tickerItems.classList.remove("static");
+    recent.forEach(n => {
+      const span = el("span");
+      span.appendChild(el("span", { className: "tag " + n.kind }, n.kind === "good" ? "👍 " : "👎 "));
+      span.appendChild(el("span", { className: "news-who" }, byId[n.kid].name.split(" ")[0] + ": "));
+      span.appendChild(document.createTextNode(n.text));
+      tickerItems.appendChild(span);
+    });
+    tickerItems.style.setProperty("--dur", Math.max(15, recent.length * 7) + "s");
+  }
+
+  document.getElementById("newsForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const text = document.getElementById("newsText").value.trim();
+    if (!text) return;
+    const kind = e.target.querySelector('input[name="kind"]:checked').value;
+    document.getElementById("newsText").value = "";
+    save({ action: "addNews", kid: kidSelect.value, kind, text }, false);
+  });
+
+  const openNews = () => newsDlg.showModal();
+  document.getElementById("ticker").addEventListener("click", openNews);
+  document.getElementById("openNews").addEventListener("click", openNews);
+
+  // ---- Init ----
+  async function load({ intro = false } = {}) {
+    try {
+      applyServerState(await api());
+      online = true;
+      if (state.locked && passcode) {
+        try { await api({ action: "check" }); unlocked = true; }
+        catch { passcode = ""; try { sessionStorage.removeItem(PASS_KEY); } catch {} }
+      }
+    } catch {
+      online = false;
+      toast("Couldn't load the latest rankings — showing the official order.");
+    }
+    updateLock();
+    render({ intro });
+    renderNews();
+  }
+  load({ intro: true });
+  // Pick up changes made on other devices when someone comes back to the tab.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && !document.querySelector("dialog[open]")) load();
+  });
+
+  // Sky flowers
+  const flowerColors = ["var(--flower-1)", "var(--flower-2)", "var(--flower-3)", "var(--flower-4)"];
+  const flowers = document.getElementById("flowers");
+  for (let i = 0; i < 18; i++) {
+    const f = document.createElement("div");
+    f.className = "flower";
+    const s = 50 + Math.random() * 90;
+    f.style.cssText = `--s:${s}px;--c:${flowerColors[i % 4]};left:${Math.random()*100}%;top:${Math.random()*100}%;transform:rotate(${Math.random()*360}deg)`;
+    flowers.appendChild(f);
+  }
+
+  // Bubbles
+  const bubbles = document.getElementById("bubbles");
+  for (let i = 0; i < 22; i++) {
+    const b = document.createElement("div");
+    b.className = "bubble";
+    const size = 10 + Math.random() * 34;
+    b.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${7 + Math.random()*9}s;animation-delay:${-Math.random()*14}s`;
+    bubbles.appendChild(b);
+  }
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
+  "installCommand": "npm install",
   "buildCommand": "",
-  "installCommand": "",
-  "outputDirectory": "."
+  "outputDirectory": "public"
 }
