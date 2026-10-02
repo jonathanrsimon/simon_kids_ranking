@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simon Kids Ranking</title>
+<meta name="description" content="The official, totally scientific ranking of the Simon and Scotson kids.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sea-top: #4fc3f7;
+    --sea-bottom: #01579b;
+    --sponge: #fff200;
+    --sponge-dark: #c9b800;
+    --hole: #b5a300;
+    --pants: #8d5524;
+    --red: #e53935;
+    --pink: #ff8fb1;
+    --flower-1: #ffffff;
+    --flower-2: #a5f3a5;
+    --flower-3: #ff9fe0;
+    --flower-4: #c9a6ff;
+    --ink: #2b1a00;
+    --sand: #f4d58d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: "Fredoka", system-ui, sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: linear-gradient(180deg, var(--sea-top) 0%, #29b6f6 35%, #0288d1 70%, var(--sea-bottom) 100%);
+    position: relative;
+  }
+
+  /* Bikini-bottom style sky flowers */
+  .flowers { position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .55; }
+  .flower { position: absolute; width: var(--s); height: var(--s); }
+  .flower::before, .flower::after {
+    content: ""; position: absolute; inset: 0; border-radius: 50%;
+    background:
+      radial-gradient(circle at 50% 18%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 82% 42%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 70% 80%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 30% 80%, var(--c) 0 18%, transparent 19%),
+      radial-gradient(circle at 18% 42%, var(--c) 0 18%, transparent 19%);
+  }
+  .flower::after { background: radial-gradient(circle at 50% 52%, var(--c) 0 22%, transparent 23%); filter: brightness(.92); }
+
+  /* Bubbles */
+  .bubbles { position: fixed; inset: 0; pointer-events: none; z-index: 1; overflow: hidden; }
+  .bubble {
+    position: absolute; bottom: -60px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.8);
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9) 0 12%, rgba(255,255,255,.15) 13% 100%);
+    animation: rise linear infinite;
+  }
+  @keyframes rise {
+    0%   { transform: translate(0, 0); opacity: 0; }
+    10%  { opacity: 1; }
+    50%  { transform: translate(20px, -55vh); }
+    100% { transform: translate(-15px, -115vh); opacity: .9; }
+  }
+
+  main { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding: 32px 16px 120px; }
+
+  header { text-align: center; margin-bottom: 36px; }
+  h1 {
+    font-family: "Luckiest Guy", cursive;
+    font-size: clamp(2.6rem, 9vw, 5.2rem);
+    line-height: .95;
+    margin: 0;
+    color: var(--sponge);
+    letter-spacing: 2px;
+    -webkit-text-stroke: 3px #e65100;
+    text-shadow: 4px 4px 0 #e65100, 8px 8px 0 rgba(0,0,0,.25);
+    transform: rotate(-3deg);
+  }
+  h1 span { display: inline-block; animation: wobble 2.4s ease-in-out infinite; }
+  h1 span:nth-child(2) { animation-delay: .2s; color: var(--pink); }
+  h1 span:nth-child(3) { animation-delay: .4s; }
+  @keyframes wobble { 0%,100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(2deg); } }
+  .tagline {
+    display: inline-block; margin-top: 20px; padding: 8px 18px;
+    background: #fff; border: 3px solid var(--ink); border-radius: 999px;
+    font-weight: 700; font-size: 1.05rem; box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  /* Ranking cards = little sponges */
+  ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; }
+  .card {
+    position: relative;
+    display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 18px;
+    padding: 22px 22px 34px;
+    border: 4px solid var(--ink);
+    border-radius: 22px 30px 18px 34px;
+    background-color: var(--sponge);
+    background-image:
+      radial-gradient(ellipse 14px 10px at 12% 25%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 9px 12px at 30% 70%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 16px 11px at 55% 30%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 10px 8px at 72% 75%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 13px 15px at 90% 35%, var(--hole) 60%, transparent 62%),
+      radial-gradient(ellipse 7px 7px at 45% 85%, var(--hole) 60%, transparent 62%);
+    box-shadow: 6px 6px 0 var(--sponge-dark), 6px 6px 0 4px var(--ink);
+    transition: transform .2s ease;
+    animation: pop-in .6s cubic-bezier(.2,1.6,.4,1) both;
+  }
+  .card:hover { transform: rotate(-1deg) scale(1.02); }
+  /* Brown square pants strip with a belt */
+  .card::after {
+    content: ""; position: absolute; left: -4px; right: -4px; bottom: -4px; height: 18px;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 40px, #111 40px 56px) 0 4px / 100% 5px no-repeat,
+      var(--pants);
+    border: 4px solid var(--ink); border-top-width: 3px;
+    border-radius: 0 0 18px 34px;
+  }
+  @keyframes pop-in { from { opacity: 0; transform: scale(.6) rotate(-6deg); } to { opacity: 1; transform: none; } }
+
+  .rank {
+    width: 82px; height: 82px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-family: "Luckiest Guy", cursive; font-size: 2.6rem; padding-top: 6px;
+    background: #fff; border: 4px solid var(--ink);
+    box-shadow: inset -6px -6px 0 rgba(0,0,0,.08);
+  }
+  .card[data-rank="1"] .rank { background: #ffd54f; }
+  .card[data-rank="2"] .rank { background: #e0e0e0; }
+  .card[data-rank="3"] .rank { background: #ffab76; }
+  .card[data-rank="1"] { padding-top: 30px; }
+  .crown {
+    position: absolute; top: -26px; left: 22px; font-size: 2.6rem;
+    animation: wobble 1.8s ease-in-out infinite;
+  }
+
+  .name {
+    font-family: "Luckiest Guy", cursive;
+    font-size: clamp(1.6rem, 5.5vw, 2.4rem);
+    margin: 0; line-height: 1.05; letter-spacing: 1px;
+    color: #fff; -webkit-text-stroke: 1.5px var(--ink);
+    text-shadow: 3px 3px 0 var(--ink);
+  }
+  .title { margin: 6px 0 10px; font-weight: 700; font-size: 1.05rem; }
+  .meter { height: 18px; background: #fff; border: 3px solid var(--ink); border-radius: 999px; overflow: hidden; }
+  .meter > i {
+    display: block; height: 100%;
+    background: repeating-linear-gradient(45deg, var(--red) 0 12px, #ff7043 12px 24px);
+    animation: fill 1.4s ease-out both;
+  }
+  @keyframes fill { from { width: 0 !important; } }
+  .score { font-size: .9rem; font-weight: 600; margin-top: 4px; }
+
+  .shuffle {
+    display: block; margin: 40px auto 0;
+    font-family: "Luckiest Guy", cursive; font-size: 1.4rem; letter-spacing: 1px; padding: 14px 28px 10px;
+    background: var(--pink); color: #fff; -webkit-text-stroke: 1px var(--ink);
+    border: 4px solid var(--ink); border-radius: 999px; box-shadow: 5px 5px 0 var(--ink);
+    cursor: pointer;
+  }
+  .shuffle:active { transform: translate(3px,3px); box-shadow: 2px 2px 0 var(--ink); }
+  .note { text-align: center; color: #fff; font-weight: 600; margin-top: 12px; text-shadow: 1px 1px 0 rgba(0,0,0,.4); }
+
+  .sand {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 70px; z-index: 1;
+    background:
+      radial-gradient(ellipse at 20% 0, transparent 40px, var(--sand) 41px) 0 0 / 160px 70px repeat-x;
+  }
+
+  @media (max-width: 520px) {
+    .card { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    .meter { width: 100%; }
+    .crown { left: 50%; transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .bubbles { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="flowers" id="flowers" aria-hidden="true"></div>
+  <div class="bubbles" id="bubbles" aria-hidden="true"></div>
+
+  <main>
+    <header>
+      <h1><span>Simon</span> <span>Kids</span> <span>Ranking!</span></h1>
+      <div class="tagline">🍍 Live from the bottom of the sea 🍍</div>
+    </header>
+
+    <ol id="ranking"></ol>
+
+    <button class="shuffle" id="shuffle" type="button">🫧 Remix the Rankings 🫧</button>
+    <p class="note">(Don't worry — refreshing the page puts everyone back in their official spot.)</p>
+  </main>
+
+  <div class="sand" aria-hidden="true"></div>
+
+<script>
+  const kids = [
+    { name: "Nathan Scotson", title: "Supreme Captain of the Seven Seas", score: 100 },
+    { name: "Jordan Simon",   title: "Grand Master Jellyfisher",          score: 96 },
+    { name: "Avery Simon",    title: "Head Fry Cook of Awesomeness",      score: 92 },
+    { name: "Carter Simon",   title: "Undefeated Bubble Blowing Champ",   score: 88 },
+    { name: "David Scotson",  title: "Legendary Sandcastle Architect",    score: 85 },
+  ];
+
+  const list = document.getElementById("ranking");
+  function render(order) {
+    list.innerHTML = "";
+    order.forEach((kid, i) => {
+      const rank = i + 1;
+      const li = document.createElement("li");
+      li.className = "card";
+      li.dataset.rank = rank;
+      li.style.animationDelay = (i * 0.12) + "s";
+      li.innerHTML = `
+        ${rank === 1 ? '<div class="crown" aria-hidden="true">👑</div>' : ""}
+        <div class="rank" aria-label="Rank ${rank}">${rank}</div>
+        <div>
+          <h2 class="name"></h2>
+          <p class="title"></p>
+          <div class="meter"><i style="width:${kid.score}%"></i></div>
+          <div class="score">Awesomeness: ${kid.score}%</div>
+        </div>`;
+      li.querySelector(".name").textContent = kid.name;
+      li.querySelector(".title").textContent = kid.title;
+      list.appendChild(li);
+    });
+  }
+  render(kids);
+
+  document.getElementById("shuffle").addEventListener("click", () => {
+    const shuffled = kids.map(k => ({ ...k })).sort(() => Math.random() - 0.5);
+    const scores = kids.map(k => k.score);
+    shuffled.forEach((k, i) => k.score = scores[i]);
+    render(shuffled);
+  });
+
+  // Sky flowers
+  const flowerColors = ["var(--flower-1)", "var(--flower-2)", "var(--flower-3)", "var(--flower-4)"];
+  const flowers = document.getElementById("flowers");
+  for (let i = 0; i < 18; i++) {
+    const f = document.createElement("div");
+    f.className = "flower";
+    const s = 50 + Math.random() * 90;
+    f.style.cssText = `--s:${s}px;--c:${flowerColors[i % 4]};left:${Math.random()*100}%;top:${Math.random()*100}%;transform:rotate(${Math.random()*360}deg)`;
+    flowers.appendChild(f);
+  }
+
+  // Bubbles
+  const bubbles = document.getElementById("bubbles");
+  for (let i = 0; i < 22; i++) {
+    const b = document.createElement("div");
+    b.className = "bubble";
+    const size = 10 + Math.random() * 34;
+    b.style.cssText = `width:${size}px;height:${size}px;left:${Math.random()*100}%;animation-duration:${7 + Math.random()*9}s;animation-delay:${-Math.random()*14}s`;
+    bubbles.appendChild(b);
+  }
+</script>
+</body>
+</html>
