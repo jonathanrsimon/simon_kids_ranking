@@ -135,6 +135,53 @@
     font-weight: 700; font-size: 1.05rem; box-shadow: 4px 4px 0 var(--ink);
   }
 
+  /* The Almighty Dad */
+  .dad {
+    position: relative; margin: 0 0 40px; padding: 34px 22px 26px; text-align: center;
+    border: 4px solid var(--ink); border-radius: 30px; overflow: hidden; isolation: isolate;
+    background: radial-gradient(circle at 50% 30%, #fffde7 0%, #ffe57f 45%, #ffb300 100%);
+    box-shadow: 0 0 0 6px #fff8c4, 0 0 40px 12px rgba(255, 236, 130, .85), 8px 8px 0 6px var(--ink);
+  }
+  .dad-rays {
+    position: absolute; inset: -60%; z-index: -1; opacity: .45;
+    background: repeating-conic-gradient(from 0deg, #fff 0deg 10deg, transparent 10deg 20deg);
+    animation: spin 40s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .dad-halo {
+    width: 150px; height: 30px; margin: -8px auto 6px; border-radius: 50%;
+    border: 7px solid #fff59d; box-shadow: 0 0 18px 6px #fff59d, inset 0 0 10px #fffde7;
+    animation: wobble 3s ease-in-out infinite;
+  }
+  .dad-kicker { margin: 0; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; font-size: .85rem; }
+  .dad-name {
+    margin: 4px 0 8px; font-family: "Luckiest Guy", cursive; letter-spacing: 2px;
+    font-size: clamp(2rem, 7.5vw, 3.4rem); line-height: 1;
+    color: #fff; -webkit-text-stroke: 2px var(--ink); text-shadow: 4px 4px 0 var(--ink), 0 0 24px #fff59d;
+  }
+  .dad-quote { margin: 0 auto 14px; max-width: 520px; font-weight: 600; font-style: italic; }
+  .dad-rank {
+    width: 90px; height: 90px; margin: 0 auto 16px; border-radius: 50%;
+    display: grid; place-items: center; font-size: 3.2rem; font-weight: 700; line-height: 1;
+    background: linear-gradient(135deg, #ffffff, #fff176 40%, #ffb300); color: #5a3d00;
+    border: 4px solid var(--ink); box-shadow: 0 0 20px 6px rgba(255,255,255,.9);
+  }
+  .dad-stats {
+    list-style: none; margin: 0 auto 14px; padding: 0; max-width: 620px;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px;
+  }
+  .dad-stats li {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    padding: 8px 12px; background: rgba(255,255,255,.85);
+    border: 3px solid var(--ink); border-radius: 14px; font-weight: 700; text-align: left;
+  }
+  .dad-stats b { font-family: "Luckiest Guy", cursive; font-weight: 400; font-size: 1.15rem; color: var(--good); white-space: nowrap; }
+  .dad-foot { margin: 0; font-weight: 600; font-size: .95rem; }
+  .mortals {
+    margin: 0 0 22px; text-align: center; font-family: "Luckiest Guy", cursive; letter-spacing: 2px;
+    font-size: clamp(1.5rem, 5vw, 2.2rem); color: #fff; -webkit-text-stroke: 1.5px var(--ink); text-shadow: 3px 3px 0 var(--ink);
+  }
+
   /* Ranking cards = little sponges */
   ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; }
   .card {
@@ -349,6 +396,21 @@
       <h1><span>Simon</span> <span>Kids</span> <span>Ranking!</span></h1>
       <div class="tagline">🍍 Live from the bottom of the sea 🍍</div>
     </header>
+
+    <section class="dad" aria-labelledby="dadName">
+      <div class="dad-rays" aria-hidden="true"></div>
+      <div class="dad-halo" aria-hidden="true"></div>
+      <div class="dad-inner">
+        <p class="dad-kicker">✨ Above all rankings ✨</p>
+        <h2 class="dad-name" id="dadName">The Almighty Dad</h2>
+        <p class="dad-quote">“In the beginning, there was Dad. And Dad said, ‘Let there be Wi-Fi,’ and there was Wi-Fi.”</p>
+        <div class="dad-rank" aria-label="Rank: infinity">∞</div>
+        <ul class="dad-stats" id="dadStats"></ul>
+        <p class="dad-foot">All-knowing. All-seeing. <em>Especially</em> when you sneak cookies.<br>Not eligible for ranking — Dad does the ranking.</p>
+      </div>
+    </section>
+
+    <h2 class="mortals">🌊 The Mortals 🌊</h2>
 
     <ol id="ranking"></ol>
 
@@ -723,6 +785,18 @@
   const openNews = () => newsDlg.showModal();
   document.getElementById("ticker").addEventListener("click", openNews);
   document.getElementById("openNews").addEventListener("click", openNews);
+
+  // ---- The Almighty Dad (always 10) ----
+  const DAD_STATS = [
+    "😊 Satisfaction", "🧠 Wisdom", "💪 Strength", "😂 Dad Jokes",
+    "🍔 Grilling", "📶 Fixing the Wi-Fi", "🚗 Parallel Parking", "👀 Knowing What You Did",
+  ];
+  const dadStats = document.getElementById("dadStats");
+  DAD_STATS.forEach(s => {
+    const li = el("li", {}, s);
+    li.appendChild(el("b", {}, "10.0 / 10"));
+    dadStats.appendChild(li);
+  });
 
   // ---- Init ----
   async function load({ intro = false } = {}) {
